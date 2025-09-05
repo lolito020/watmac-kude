@@ -12,10 +12,20 @@ app = Flask(__name__)
 # Límite de subida (ajustá si necesitás)
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10 MB
 
-# CORS: en producción, seteá ALLOWED_ORIGINS="https://tudominio.com,https://www.tudominio.com"
+# ==============================
+# CORS configurado para POST + OPTIONS y preflight
+# ==============================
 ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*")
 origins = [o.strip() for o in ALLOWED_ORIGINS.split(",")] if ALLOWED_ORIGINS != "*" else "*"
-CORS(app, resources={r"/api/*": {"origins": origins}})
+
+CORS(app, resources={
+    r"/api/*": {
+        "origins": origins,
+        "methods": ["POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"],
+        "expose_headers": ["Content-Disposition"],
+    }
+})
 
 # ==========
 #  PLANTILLA (tu HTML original)
@@ -366,8 +376,13 @@ def parse_xml_stream(file_stream):
 #  ENDPOINTS
 # ==========
 
-@app.post("/api/kude")
+# Ahora acepta POST + OPTIONS (preflight)
+@app.route("/api/kude", methods=["POST", "OPTIONS"])
 def kude():
+    if request.method == "OPTIONS":
+        # Respuesta al preflight CORS
+        return ("", 204)
+
     if 'xml' not in request.files:
         return jsonify({"error": "Falta archivo XML"}), 400
     f = request.files['xml']
@@ -398,3 +413,4 @@ def healthz():
 if __name__ == "__main__":
     # Para correr localmente: python app.py
     app.run(host="0.0.0.0", port=5000)
+
