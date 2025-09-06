@@ -105,6 +105,7 @@ HTML_TEMPLATE = r'''
                 <div>Condición de Venta: {{ documento.condicion_venta }}</div>
                 <div>Moneda: {{ documento.moneda }}</div>
                 <div>Tipo de transacción: {{ documento.tipo_transaccion }}</div>
+                <div>Tipo de cambio: {{ documento.tipo_cambio }}</div>
             </div>
         </div>
 
@@ -280,6 +281,7 @@ def parse_xml_stream(file_stream):
         'condicion_venta': get_text('dDCondOpe'),
         'moneda': get_text('dDesMoneOpe'),
         'tipo_transaccion': get_text('dDesTipTra'),
+        'tipo_cambio': get_text('dTiCam'),
         'cdc': cdc,
         'cdc_formateado': cdc_formateado,
         'qr_code': generate_qr_image(get_text('dCarQR'))
@@ -352,7 +354,7 @@ def parse_xml_stream(file_stream):
         'iva10': fmt0(total_diez),
         'redondeo': fmt0(g('dRedon')),
         'total_operacion': fmt0(g('dTotOpe')),
-        'total_guaranies': fmt0(g('dTotGralOpe'))
+        'total_guaranies': fmt0(g('dTotalGs'))
     }
 
     # Liquidación de IVA
@@ -413,4 +415,6 @@ def healthz():
 if __name__ == "__main__":
     # Para correr localmente: python app.py
     app.run(host="0.0.0.0", port=5000)
+
+
 
